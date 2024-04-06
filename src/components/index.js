@@ -10,3 +10,5 @@ export { default as CollectionProfile } from './portfolio/CollectionProfile/Coll
 export { default as Filter } from './portfolio/Filter/Filter.jsx';
 export { default as NFT } from './portfolio/NFT/NFT.jsx';
 export { default as Title } from './portfolio/Title/Title.jsx';
+
+export { default as Mint } from './Mint';

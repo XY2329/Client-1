@@ -95,97 +95,95 @@ const Mint = () => {
   }, [mintCreated]);
 
   // Inner Mint component to handle showing the Mint button,
-  // and mint messages
-  const Mint = () => {
-    const wallet = useWallet();
-    umi = umi.use(walletAdapterIdentity(wallet));
 
-    // check wallet balance
-    const checkWalletBalance = async () => {
-      const balance = await umi.rpc.getBalance(umi.identity.publicKey);
-      if (Number(balance.basisPoints) / 1000000000 < costInSol) {
-        setMintMsg("Add more SOL to your wallet.");
-        setMintDisabled(true);
-      } else {
-        if (countRemaining !== undefined && countRemaining > 0) {
-          setMintDisabled(false);
-        }
+  const wallet = useWallet();
+  umi = umi.use(walletAdapterIdentity(wallet));
+
+  // check wallet balance
+  const checkWalletBalance = async () => {
+    const balance = await umi.rpc.getBalance(umi.identity.publicKey);
+    if (Number(balance.basisPoints) / 1000000000 < costInSol) {
+      setMintMsg("Add more SOL to your wallet.");
+      setMintDisabled(true);
+    } else {
+      if (countRemaining !== undefined && countRemaining > 0) {
+        setMintDisabled(false);
       }
-    };
-
-    if (!wallet.connected) {
-      return <p>Please connect your wallet.</p>;
     }
-
-    checkWalletBalance();
-
-    const mintBtnHandler = async () => {
-
-      if (!cmv3v2 || !defaultCandyGuardSet) {
-        setMintMsg("There was an error fetching the candy machine. Try refreshing your browser window.");
-        return;
-      }
-      setLoading(true);
-      setMintMsg(undefined);
-
-      try {
-        const candyMachine = cmv3v2;
-        const candyGuard = defaultCandyGuardSet;
-
-        const nftSigner = generateSigner(umi);
-
-        const mintArgs = {};
-
-        // solPayment has mintArgs
-        const defaultGuards = candyGuard?.guards;
-        const solPaymentGuard = defaultGuards?.solPayment;
-        if (solPaymentGuard) {
-          const solPayment = unwrapSome(solPaymentGuard);
-          if (solPayment) {
-            const treasury = solPayment.destination;
-
-            mintArgs.solPayment = some({
-              destination: treasury
-            });
-          }
-        }
-
-        const tx = transactionBuilder()
-          .add(setComputeUnitLimit(umi, { units: 600_000 }))
-          .add(mintV2(umi, {
-            candyMachine: candyMachine.publicKey,
-            collectionMint: candyMachine.collectionMint,
-            collectionUpdateAuthority: candyMachine.authority,
-            nftMint: nftSigner,
-            candyGuard: candyGuard?.publicKey,
-            mintArgs: mintArgs,
-            tokenStandard: TokenStandard.ProgrammableNonFungible
-          }))
-
-
-        const { signature } = await tx.sendAndConfirm(umi, {
-          confirm: { commitment: "finalized" }, send: {
-            skipPreflight: true,
-          },
-        });
-
-        setMintCreated(nftSigner.publicKey);
-        setMintMsg("Mint was successful!");
-
-      } catch (err) {
-        console.error(err);
-        setMintMsg(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    return (
-      <button onClick={mintBtnHandler}>
-        Click me wdadafegwegfwefwf
-      </button>
-    );
   };
-}
- export default Mint;
 
+  if (!wallet.connected) {
+    return <p>Please connect your wallet.</p>;
+  }
+
+  checkWalletBalance();
+
+  const mintBtnHandler = async () => {
+
+    if (!cmv3v2 || !defaultCandyGuardSet) {
+      setMintMsg("There was an error fetching the candy machine. Try refreshing your browser window.");
+      return;
+    }
+    setLoading(true);
+    setMintMsg(undefined);
+
+    try {
+      const candyMachine = cmv3v2;
+      const candyGuard = defaultCandyGuardSet;
+
+      const nftSigner = generateSigner(umi);
+
+      const mintArgs = {};
+
+      // solPayment has mintArgs
+      const defaultGuards = candyGuard?.guards;
+      const solPaymentGuard = defaultGuards?.solPayment;
+      if (solPaymentGuard) {
+        const solPayment = unwrapSome(solPaymentGuard);
+        if (solPayment) {
+          const treasury = solPayment.destination;
+
+          mintArgs.solPayment = some({
+            destination: treasury
+          });
+        }
+      }
+
+      const tx = transactionBuilder()
+        .add(setComputeUnitLimit(umi, { units: 600_000 }))
+        .add(mintV2(umi, {
+          candyMachine: candyMachine.publicKey,
+          collectionMint: candyMachine.collectionMint,
+          collectionUpdateAuthority: candyMachine.authority,
+          nftMint: nftSigner,
+          candyGuard: candyGuard?.publicKey,
+          mintArgs: mintArgs,
+          tokenStandard: TokenStandard.ProgrammableNonFungible
+        }))
+
+
+      const { signature } = await tx.sendAndConfirm(umi, {
+        confirm: { commitment: "finalized" }, send: {
+          skipPreflight: true,
+        },
+      });
+
+      setMintCreated(nftSigner.publicKey);
+      setMintMsg("Mint was successful!");
+
+    } catch (err) {
+      console.error(err);
+      setMintMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button style={{ backgroundColor: "blue" }} onClick={mintBtnHandler}>
+      Click me
+    </button>
+  );
+};
+
+export default Mint;
